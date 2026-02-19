@@ -1,0 +1,284 @@
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+/* ── The card itself ────────────────────────────────── */
+.card {
+  width: 100%;
+  max-width: 400px;
+  background: #0d0d0d;
+  border: 1px solid #1e1e1e;
+  border-radius: 16px;
+  padding: 2rem 1.75rem;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Subtle diagonal grain lines as bg decoration */
+.card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    -55deg,
+    transparent,
+    transparent 40px,
+    rgba(255,255,255,0.012) 40px,
+    rgba(255,255,255,0.012) 41px
+  );
+  pointer-events: none;
+}
+
+/* ── Header ── */
+.cardHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.75rem;
+}
+
+.cardBrand {
+  font-family:'Poppins', sans-serif;
+  /*font-style: italic;*/;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #18e96a;
+}
+
+.cardDate {
+  font-size: 0.65rem;
+  color: #3a3a3a;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-family: 'Instrument Sans', sans-serif;
+}
+
+/* ── Names ── */
+.names {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.nameA, .nameB {
+  font-family: 'Instrument Sans', sans-serif;
+  font-size: 1rem;
+  font-weight: 500;
+  color: #efefef;
+}
+
+.nameVs {
+  font-family: 'Poppins', sans-serif;
+  /*font-style: italic;*/;
+  font-size: 0.75rem;
+  color: #3a3a3a;
+}
+
+/* ── Score ring ── */
+.ringWrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1.5rem;
+  width: 220px;
+  height: 220px;
+}
+
+.ringInner {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
+.ringScore {
+  font-family: 'Poppins', sans-serif;
+  /*font-style: italic;*/;
+  font-size: 3.5rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.ringPct {
+  font-family: 'Poppins', sans-serif;
+  /*font-style: italic;*/;
+  font-size: 1.2rem;
+  color: #555;
+  margin-top: -4px;
+}
+
+.ringLabel {
+  font-family: 'Instrument Sans', sans-serif;
+  font-size: 0.65rem;
+  color: #444;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  margin-top: 4px;
+}
+
+/* ── Vibe ── */
+.vibe {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 1.5rem;
+}
+
+.vibeEmoji { font-size: 1rem; }
+
+.vibeLabel {
+  font-family: 'Instrument Sans', sans-serif;
+  font-size: 0.8rem;
+  color: #777;
+  letter-spacing: 0.05em;
+}
+
+/* ── Stats grid ── */
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1px;
+  background: #1a1a1a;
+  border: 1px solid #1a1a1a;
+  border-radius: 10px;
+  overflow: hidden;
+  margin-bottom: 1.5rem;
+}
+
+.miniStat {
+  background: #111;
+  padding: 1rem 0.5rem;
+  text-align: center;
+}
+
+.miniStatNum {
+  font-family: 'Poppins', sans-serif;
+  /*font-style: italic;*/;
+  font-size: 1.5rem;
+  font-weight: 700;
+  line-height: 1;
+  margin-bottom: 4px;
+}
+
+.miniStatLabel {
+  font-family: 'Instrument Sans', sans-serif;
+  font-size: 0.58rem;
+  color: #3a3a3a;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  line-height: 1.3;
+}
+
+/* ── Top tracks ── */
+.topTracks {
+  border: 1px solid #1a1a1a;
+  border-radius: 10px;
+  overflow: hidden;
+  margin-bottom: 1.5rem;
+}
+
+.topTracksLabel {
+  font-family: 'Instrument Sans', sans-serif;
+  font-size: 0.6rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: #3a3a3a;
+  padding: 0.75rem 1rem 0.5rem;
+  border-bottom: 1px solid #1a1a1a;
+}
+
+.trackRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0.6rem 1rem;
+  border-bottom: 1px solid #141414;
+}
+.trackRow:last-child { border-bottom: none; }
+
+.trackIdx {
+  font-family: 'Poppins', sans-serif;
+  /*font-style: italic;*/;
+  font-size: 0.75rem;
+  color: #2a2a2a;
+  width: 14px;
+  flex-shrink: 0;
+}
+
+.trackName {
+  font-family: 'Instrument Sans', sans-serif;
+  font-size: 0.78rem;
+  color: #ccc;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.trackArtist {
+  font-size: 0.65rem;
+  color: #444;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ── Card footer ── */
+.cardFooter {
+  font-family: 'Poppins', sans-serif;
+  /*font-style: italic;*/;
+  font-size: 0.65rem;
+  color: #222;
+  text-align: center;
+}
+
+/* ── Export button ── */
+.exportBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 11px 22px;
+  background: transparent;
+  border: 1px solid var(--border-hover);
+  border-radius: 100px;
+  color: var(--text-secondary);
+  font-family: var(--font-body);
+  font-size: 0.82rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.exportBtn:hover:not(:disabled) {
+  border-color: rgba(24, 233, 106, 0.35);
+  color: var(--green);
+  box-shadow: 0 0 20px rgba(24, 233, 106, 0.06);
+}
+
+.exportBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.exportSpinner {
+  width: 12px;
+  height: 12px;
+  border: 1.5px solid currentColor;
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  display: inline-block;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
