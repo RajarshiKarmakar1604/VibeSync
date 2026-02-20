@@ -166,8 +166,8 @@ export default function Dashboard({ token, onLogout }) {
               <Stat label={`${results.user_a.display_name}'s songs`} value={results.stats.total_a} />
               <Stat label={`${results.user_b.display_name}'s songs`} value={results.stats.total_b} />
               <Stat label="In common" value={results.stats.common_count} accent="green" />
-              <Stat label="Only yours" value={results.stats.only_a_count} accent="blue" />
-              <Stat label="Only theirs" value={results.stats.only_b_count} accent="red" />
+              <Stat label={`Only ${results.user_a.display_name}`} value={results.stats.only_a_count} accent="blue" />
+              <Stat label={`Only ${results.user_b.display_name}`} value={results.stats.only_b_count} accent="red" />
             </div>
 
             {/* Tabs */}
