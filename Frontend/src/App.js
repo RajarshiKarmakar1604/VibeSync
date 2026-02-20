@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback } from 'react';
 import Landing from './components/Landing';
 import AuthCallback from './components/AuthCallback';
 import Dashboard from './components/Dashboard';
@@ -22,7 +22,10 @@ function clearToken() {
 
 export default function App() {
   const [token, setToken] = useState(() => getStoredToken());
-  const isCallback = window.location.pathname === '/auth-callback';
+
+  // Check if there's a token in the URL (coming back from Spotify auth)
+  const params = new URLSearchParams(window.location.search);
+  const urlToken = params.get('token');
 
   const handleAuth = useCallback((newToken) => {
     storeToken(newToken);
@@ -34,8 +37,8 @@ export default function App() {
     setToken(null);
   }, []);
 
-  // If we're on the callback route, show the callback handler
-  if (isCallback) {
+  // Token in URL = just came back from Spotify login
+  if (urlToken) {
     return <AuthCallback onAuth={handleAuth} />;
   }
 
