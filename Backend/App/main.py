@@ -7,6 +7,7 @@ from datetime import datetime, timezone, timedelta
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import RedirectResponse
+import re
 
 from config import settings
 from auth import create_access_token, decode_access_token
@@ -54,7 +55,14 @@ def _cleanup_expired_sessions():
 
 
 
+
+
+
 def _normalize(s: str) -> str:
+    # Remove anything in parentheses/brackets like (From "Agneepath") or [Remastered]
+    s = re.sub(r'\s*[\(\[].*?[\)\]]', '', s)
+    # Remove common suffixes after a dash like - Remastered, - Live Version, - Radio Edit
+    s = re.sub(r'\s*-\s*(remastered|live|radio edit|acoustic|remix|version|edit|mix|demo|reprise|instrumental).*', '', s, flags=re.IGNORECASE)
     return s.lower().strip()
 
 
