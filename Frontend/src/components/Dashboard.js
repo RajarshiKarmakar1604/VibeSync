@@ -173,7 +173,7 @@ export default function Dashboard({ token, onLogout }) {
             {/* Tabs */}
             <div className={styles.tabs}>
               <Tab active={activeTab === 'only_a'} color="blue" onClick={() => setActiveTab('only_a')}
-                label={`Only you (${results.stats.only_a_count})`} />
+                label={`Only ${results.user_a.display_name} (${results.stats.only_a_count})`} />
               <Tab active={activeTab === 'only_b'} color="red" onClick={() => setActiveTab('only_b')}
                 label={`Only ${results.user_b.display_name} (${results.stats.only_b_count})`} />
               <Tab active={activeTab === 'common'} color="green" onClick={() => setActiveTab('common')}
