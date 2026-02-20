@@ -333,7 +333,8 @@
 
 .pill {
   font-size: 0.68rem;
-  color: var(--text-muted);
+  color: #F3F4F6;
+  /*color: var(--text-muted);*/
   border: 1px solid var(--border);
   border-radius: 100px;
   padding: 4px 10px;
