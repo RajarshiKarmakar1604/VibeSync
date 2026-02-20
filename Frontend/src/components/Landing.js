@@ -75,7 +75,7 @@ export default function Landing() {
       <div className={styles.bottomBar}>
         <div className={styles.ruleBottom} />
         <div className={styles.bottomContent}>
-          <span className={styles.bottomLeft}>Powered by Spotify Web API</span>
+          <span className={styles.bottomLeft}>©Rajarshi</span>
           <div className={styles.pills}>
             <span className={styles.pill}>Your songs</span>
             <span className={styles.pill}>Friend's songs</span>
