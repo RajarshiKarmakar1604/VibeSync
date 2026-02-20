@@ -24,8 +24,8 @@ export default function App() {
   const [token, setToken] = useState(() => getStoredToken());
 
   // Check if there's a token in the URL (coming back from Spotify auth)
-  const params = new URLSearchParams(window.location.search);
-  const urlToken = params.get('token');
+  const hash = window.location.hash;
+const urlToken = hash.startsWith('#token=') ? hash.slice(7) : null;
 
   const handleAuth = useCallback((newToken) => {
     storeToken(newToken);

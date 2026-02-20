@@ -97,7 +97,7 @@ async def callback(code: str = Query(...), state: str = Query(...)):
         "refresh_token": spotify_refresh_token,
     })
 
-    frontend_url = f"https://vibe-sync-tau.vercel.app/auth-callback?token={jwt_token}"
+    frontend_url = f"https://vibe-sync-tau.vercel.app/#token={jwt_token}"
     return RedirectResponse(frontend_url)
 
 
