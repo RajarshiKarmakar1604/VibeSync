@@ -18,7 +18,7 @@ FRONTEND_URL = "https://vibe-sync-navy.vercel.app"
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[FRONTEND_URL, "https://vibe-sync-navy.vercel.app"],
+    allow_origins=[FRONTEND_URL, "http://localhost:3000"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -52,6 +52,35 @@ def _cleanup_expired_sessions():
     for k in expired:
         del _sessions[k]
 
+
+
+def _normalize(s: str) -> str:
+    return s.lower().strip()
+
+
+def _fuzzy_match(only_a_ids, only_b_ids, map_a, map_b, common_ids):
+    name_map_a = {}
+    for tid in only_a_ids:
+        t = map_a[tid]
+        key = _normalize(t["name"]) + "|" + _normalize(t["artists"][0])
+        name_map_a[key] = tid
+
+    name_map_b = {}
+    for tid in only_b_ids:
+        t = map_b[tid]
+        key = _normalize(t["name"]) + "|" + _normalize(t["artists"][0])
+        name_map_b[key] = tid
+
+    fuzzy_common_keys = set(name_map_a.keys()) & set(name_map_b.keys())
+
+    for key in fuzzy_common_keys:
+        tid_a = name_map_a[key]
+        tid_b = name_map_b[key]
+        only_a_ids.discard(tid_a)
+        only_b_ids.discard(tid_b)
+        common_ids.add(tid_a)
+
+    return only_a_ids, only_b_ids, common_ids
 
 # ─── Auth ─────────────────────────────────────────────────────────────────────
 
@@ -273,9 +302,15 @@ async def join_room(body: dict):
     map_b = {t["id"]: t for t in tracks_b}
     ids_a = set(map_a.keys())
     ids_b = set(map_b.keys())
+    # First pass — exact ID match
     only_a_ids = ids_a - ids_b
     only_b_ids = ids_b - ids_a
     common_ids = ids_a & ids_b
+
+    # Second pass — fuzzy match by name + artist
+    only_a_ids, only_b_ids, common_ids = _fuzzy_match(
+        only_a_ids, only_b_ids, map_a, map_b, common_ids
+    )
 
     del _rooms[room_code]
 

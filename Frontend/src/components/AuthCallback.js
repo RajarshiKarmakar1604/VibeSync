@@ -11,7 +11,7 @@ export default function AuthCallback({ onAuth }) {
     if (sessionId) {
       // Exchange short session ID for a proper JWT
       fetch(`${BASE}/session?s=${sessionId}`)
-  .then(res => {
+  .then(res => {m
     console.log('Status:', res.status);
     return res.json();
   })
