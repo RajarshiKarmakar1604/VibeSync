@@ -11,18 +11,21 @@ export default function AuthCallback({ onAuth }) {
     if (sessionId) {
       // Exchange short session ID for a proper JWT
       fetch(`${BASE}/session?s=${sessionId}`)
-        .then(res => {
-          if (!res.ok) throw new Error('Session expired');
-          return res.json();
-        })
-        .then(({ token }) => {
-          onAuth(token);
-          window.history.replaceState({}, '', '/');
-        })
-        .catch(() => {
-          // Session failed, redirect to home to log in again
-          window.location.href = '/';
-        });
+  .then(res => {
+    console.log('Status:', res.status);
+    return res.json();
+  })
+  .then(data => {
+    console.log('Data:', data);
+    if (data.token) {
+      onAuth(data.token);
+      window.history.replaceState({}, '', '/');
+    }
+  })
+  .catch(err => {
+    console.error('FETCH ERROR:', err);
+    // Don't redirect, stay on page so we can see the error
+  });
     } else {
       window.location.href = '/';
     }
