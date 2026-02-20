@@ -12,7 +12,7 @@ from config import settings
 from auth import create_access_token, decode_access_token
 from spotify import SpotifyClient
 
-app = FastAPI(title="VibeSync API")
+app = FastAPI(title="Spotify Comparability API")
 
 app.add_middleware(
     CORSMiddleware,
@@ -81,7 +81,11 @@ async def callback(code: str = Query(...), state: str = Query(...)):
     if resp.status_code != 200:
         raise HTTPException(status_code=400, detail="Failed to exchange code for token")
 
-    spotify_access_token = resp.json()["access_token"]
+    token_data = resp.json()
+    spotify_access_token = token_data["access_token"]
+    # Store refresh token so we can silently renew later
+    spotify_refresh_token = token_data.get("refresh_token", "")
+
     profile = await SpotifyClient(spotify_access_token).get_profile()
     user_id = profile["id"]
     display_name = profile.get("display_name", user_id)
@@ -90,6 +94,7 @@ async def callback(code: str = Query(...), state: str = Query(...)):
         "sub": user_id,
         "display_name": display_name,
         "spotify_token": spotify_access_token,
+        "refresh_token": spotify_refresh_token,
     })
 
     frontend_url = f"http://localhost:3000/auth-callback?token={jwt_token}"
@@ -100,6 +105,68 @@ async def callback(code: str = Query(...), state: str = Query(...)):
 async def get_me(token: str = Query(...)):
     payload = decode_access_token(token)
     return {"user_id": payload["sub"], "display_name": payload["display_name"]}
+
+
+# ─── Token Refresh ────────────────────────────────────────────────────────────
+
+@app.post("/refresh")
+async def refresh_token(body: dict):
+    """
+    Exchange old JWT for a new one with a fresh Spotify access token.
+    Body: { "token": "<old_jwt>" }
+    Returns: { "token": "<new_jwt>" }
+    """
+    old_token = body.get("token")
+    if not old_token:
+        raise HTTPException(status_code=422, detail="token is required")
+
+    # Allow expired JWTs through here so we can refresh them
+    try:
+        payload = decode_access_token(old_token)
+    except Exception:
+        # Try decoding without expiry verification to get the refresh token
+        import jwt as pyjwt
+        try:
+            payload = pyjwt.decode(
+                old_token,
+                settings.JWT_SECRET,
+                algorithms=[settings.JWT_ALGORITHM],
+                options={"verify_exp": False},
+            )
+        except Exception:
+            raise HTTPException(status_code=401, detail="Invalid token — please log in again.")
+
+    refresh_token_str = payload.get("refresh_token", "")
+    if not refresh_token_str:
+        raise HTTPException(status_code=401, detail="No refresh token available — please log in again.")
+
+    async with httpx.AsyncClient() as client:
+        resp = await client.post(
+            "https://accounts.spotify.com/api/token",
+            data={
+                "grant_type": "refresh_token",
+                "refresh_token": refresh_token_str,
+            },
+            headers={"Content-Type": "application/x-www-form-urlencoded"},
+            auth=(settings.SPOTIFY_CLIENT_ID, settings.SPOTIFY_CLIENT_SECRET),
+        )
+
+    if resp.status_code != 200:
+        raise HTTPException(status_code=401, detail="Spotify refresh failed — please log in again.")
+
+    token_data = resp.json()
+    new_spotify_token = token_data["access_token"]
+    # Spotify sometimes gives a new refresh token too
+    new_refresh_token = token_data.get("refresh_token", refresh_token_str)
+
+    new_jwt = create_access_token({
+        "sub": payload["sub"],
+        "display_name": payload["display_name"],
+        "spotify_token": new_spotify_token,
+        "refresh_token": new_refresh_token,
+    })
+
+    return {"token": new_jwt}
 
 
 # ─── Room Code ────────────────────────────────────────────────────────────────
@@ -113,7 +180,6 @@ async def create_room(body: dict):
     payload = decode_access_token(token)
     _cleanup_expired_rooms()
 
-    # Reuse existing room if user already has one
     for code, room in _rooms.items():
         try:
             existing = decode_access_token(room["token"])

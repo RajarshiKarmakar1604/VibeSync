@@ -179,7 +179,7 @@
 }
 
 .compatScore {
-  font-family: var(--font-display); ;
+  font-family: var(--font-display); font-style: italic;
   font-size: 5rem; font-weight: 700; line-height: 1;
   color: var(--green); margin-bottom: 0.5rem;
 }
@@ -224,4 +224,50 @@
   .statsBar { grid-template-columns: repeat(3, 1fr); }
   .header { padding: 1rem 1.25rem; }
   .codeChar { width: 40px; height: 48px; font-size: 1.3rem; }
+}
+
+/* ── Mobile overrides ── */
+@media (max-width: 600px) {
+  .header { padding: 0.875rem 1rem; }
+
+  .logo { font-size: 1rem; }
+
+  .userChip { 
+    max-width: 120px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .main { padding: 2rem 1rem 4rem; }
+
+  .card { padding: 1.25rem; }
+
+  .codeChar {
+    width: 38px;
+    height: 46px;
+    font-size: 1.2rem;
+    border-radius: 6px;
+  }
+
+  .codeDisplay { gap: 5px; }
+
+  .codeInput { font-size: 1.2rem; letter-spacing: 0.15em; }
+
+  .statsBar { grid-template-columns: repeat(3, 1fr); }
+
+  .statsBar > *:nth-child(4),
+  .statsBar > *:nth-child(5) {
+    grid-column: span 1;
+  }
+
+  .compatCard { padding: 1.5rem 1rem; }
+
+  .compatScore { font-size: 4rem; }
+
+  .tabs { gap: 4px; }
+
+  .tabs button { font-size: 0.72rem; padding: 6px 10px; }
+
+  .ghostBtn { font-size: 0.78rem; padding: 8px 14px; }
 }
