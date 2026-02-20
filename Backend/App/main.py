@@ -14,9 +14,11 @@ from spotify import SpotifyClient
 
 app = FastAPI(title="Spotify Comparability API")
 
+FRONTEND_URL = "https://vibe-sync-tau.vercel.app"
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://vibe-sync-tau.vercel.app"],
+    allow_origins=[FRONTEND_URL, "http://localhost:3000"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -24,7 +26,9 @@ app.add_middleware(
 
 _oauth_states: set[str] = set()
 _rooms: dict[str, dict] = {}
+_sessions: dict[str, dict] = {}  # short session ID -> user data
 ROOM_CODE_TTL_MINUTES = 30
+SESSION_TTL_MINUTES = 5  # short-lived, just for the handoff
 
 
 def _generate_room_code() -> str:
@@ -40,6 +44,13 @@ def _cleanup_expired_rooms():
     expired = [k for k, v in _rooms.items() if v["created_at"] < cutoff]
     for k in expired:
         del _rooms[k]
+
+
+def _cleanup_expired_sessions():
+    cutoff = datetime.now(timezone.utc) - timedelta(minutes=SESSION_TTL_MINUTES)
+    expired = [k for k, v in _sessions.items() if v["created_at"] < cutoff]
+    for k in expired:
+        del _sessions[k]
 
 
 # ─── Auth ─────────────────────────────────────────────────────────────────────
@@ -83,22 +94,48 @@ async def callback(code: str = Query(...), state: str = Query(...)):
 
     token_data = resp.json()
     spotify_access_token = token_data["access_token"]
-    # Store refresh token so we can silently renew later
     spotify_refresh_token = token_data.get("refresh_token", "")
 
     profile = await SpotifyClient(spotify_access_token).get_profile()
     user_id = profile["id"]
     display_name = profile.get("display_name", user_id)
 
-    jwt_token = create_access_token({
+    # Store session server-side, only pass short ID to frontend
+    _cleanup_expired_sessions()
+    session_id = secrets.token_urlsafe(8)  # ~11 chars, safe for URLs
+    _sessions[session_id] = {
         "sub": user_id,
         "display_name": display_name,
         "spotify_token": spotify_access_token,
         "refresh_token": spotify_refresh_token,
+        "created_at": datetime.now(timezone.utc),
+    }
+
+    # Short ID in URL — no more giant JWT in query string
+    frontend_url = f"{FRONTEND_URL}/?s={session_id}"
+    return RedirectResponse(frontend_url)
+
+
+@app.get("/session")
+async def get_session(s: str = Query(...)):
+    """
+    Frontend calls this once with the short session ID.
+    Returns a proper JWT. Session is deleted after use.
+    """
+    _cleanup_expired_sessions()
+    if s not in _sessions:
+        raise HTTPException(status_code=404, detail="Session not found or expired. Please log in again.")
+
+    data = _sessions.pop(s)  # delete after use — one-time only
+
+    jwt_token = create_access_token({
+        "sub": data["sub"],
+        "display_name": data["display_name"],
+        "spotify_token": data["spotify_token"],
+        "refresh_token": data["refresh_token"],
     })
 
-    frontend_url = f"https://vibe-sync-tau.vercel.app/#token={jwt_token}"
-    return RedirectResponse(frontend_url)
+    return {"token": jwt_token}
 
 
 @app.get("/me")
@@ -111,20 +148,13 @@ async def get_me(token: str = Query(...)):
 
 @app.post("/refresh")
 async def refresh_token(body: dict):
-    """
-    Exchange old JWT for a new one with a fresh Spotify access token.
-    Body: { "token": "<old_jwt>" }
-    Returns: { "token": "<new_jwt>" }
-    """
     old_token = body.get("token")
     if not old_token:
         raise HTTPException(status_code=422, detail="token is required")
 
-    # Allow expired JWTs through here so we can refresh them
     try:
         payload = decode_access_token(old_token)
     except Exception:
-        # Try decoding without expiry verification to get the refresh token
         import jwt as pyjwt
         try:
             payload = pyjwt.decode(
@@ -156,7 +186,6 @@ async def refresh_token(body: dict):
 
     token_data = resp.json()
     new_spotify_token = token_data["access_token"]
-    # Spotify sometimes gives a new refresh token too
     new_refresh_token = token_data.get("refresh_token", refresh_token_str)
 
     new_jwt = create_access_token({

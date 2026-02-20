@@ -23,9 +23,9 @@ function clearToken() {
 export default function App() {
   const [token, setToken] = useState(() => getStoredToken());
 
-  // Check if there's a token in the URL (coming back from Spotify auth)
-  const hash = window.location.hash;
-const urlToken = hash.startsWith('#token=') ? hash.slice(7) : null;
+  // Check if there's a session ID in the URL (coming back from Spotify login)
+  const params = new URLSearchParams(window.location.search);
+  const sessionId = params.get('s');
 
   const handleAuth = useCallback((newToken) => {
     storeToken(newToken);
@@ -37,12 +37,12 @@ const urlToken = hash.startsWith('#token=') ? hash.slice(7) : null;
     setToken(null);
   }, []);
 
-  // Token in URL = just came back from Spotify login
-  if (urlToken) {
+  // Session ID in URL = just came back from Spotify, exchange for JWT
+  if (sessionId) {
     return <AuthCallback onAuth={handleAuth} />;
   }
 
-  // Logged in
+  // Already logged in
   if (token) {
     return <Dashboard token={token} onLogout={handleLogout} />;
   }
