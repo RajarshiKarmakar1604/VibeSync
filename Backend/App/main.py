@@ -14,7 +14,7 @@ from spotify import SpotifyClient
 
 app = FastAPI(title="Spotify Comparability API")
 
-FRONTEND_URL = "https://vibe-sync-tau.vercel.app"
+FRONTEND_URL = "https://vibe-sync-navy.vercel.app/"
 
 app.add_middleware(
     CORSMiddleware,
