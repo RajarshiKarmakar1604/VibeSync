@@ -1,5 +1,5 @@
 //const BASE = 'http://127.0.0.1:8000';
-const BASE = 'https://vibesync-m2n5.onrender.com/';
+const BASE = 'https://vibesync-m2n5.onrender.com';
 const TOKEN_KEY = 'sp_cmp_token';
 
 // ─── Token storage helpers ────────────────────────────────────────────────────
