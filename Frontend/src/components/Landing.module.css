@@ -321,8 +321,7 @@
 
 .bottomLeft {
   font-size: 0.68rem;
-  color:#F3F4F6;
-  /*color: var(--text-muted);*/
+  color: var(--text-secondary);
   letter-spacing: 0.05em;
 }
 
@@ -333,8 +332,7 @@
 
 .pill {
   font-size: 0.68rem;
-  color: #F3F4F6;
-  /*color: var(--text-muted);*/
+  color: var(--text-secondary);
   border: 1px solid var(--border);
   border-radius: 100px;
   padding: 4px 10px;
