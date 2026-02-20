@@ -16,7 +16,7 @@ app = FastAPI(title="Spotify Comparability API")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],
+    allow_origins=["https://vibe-sync-tau.vercel.app"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -97,7 +97,7 @@ async def callback(code: str = Query(...), state: str = Query(...)):
         "refresh_token": spotify_refresh_token,
     })
 
-    frontend_url = f"http://localhost:3000/auth-callback?token={jwt_token}"
+    frontend_url = f"https://vibe-sync-tau.vercel.app/auth-callback?token={jwt_token}"
     return RedirectResponse(frontend_url)
 
 
